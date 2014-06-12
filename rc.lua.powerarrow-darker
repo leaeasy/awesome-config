@@ -50,6 +50,7 @@ end
 
 run_once("urxvtd")
 run_once("unclutter")
+run_once("start-pulseauido-x11")
 -- }}}
 
 -- {{{ Variable definitions
@@ -63,14 +64,12 @@ beautiful.init(os.getenv("HOME") .. "/.config/awesome/themes/powerarrow-darker/t
 modkey     = "Mod4"
 altkey     = "Mod1"
 terminal   = "urxvtc" or "xterm"
-editor     = os.getenv("EDITOR") or "nano" or "vi"
+editor     = os.getenv("EDITOR") or "vim" or "nano"
 editor_cmd = terminal .. " -e " .. editor
 
 -- user defined
-browser    = "dwb"
-browser2   = "iron"
+browser    = "firefox"
 gui_editor = "gvim"
-graphics   = "gimp"
 mail       = terminal .. " -e mutt "
 iptraf     = terminal .. " -g 180x54-20+34 -e sudo iptraf-ng -i all "
 musicplr   = terminal .. " -g 130x34-320+16 -e ncmpcpp "
@@ -86,7 +85,7 @@ local layouts = {
 
 -- {{{ Tags
 tags = {
-   names = { "1", "2", "3", "4", "5"},
+   names = { "WEB", "TERMINAL", "FILES", "EMACS", "OTHER"},
    layout = { layouts[1], layouts[2], layouts[3], layouts[1], layouts[4] }
 }
 
@@ -104,7 +103,7 @@ end
 -- }}}
 
 -- {{{ Menu
-require("freedesktop/freedesktop")
+-- require("freedesktop/freedesktop")
 -- }}}
 
 -- {{{ Wibox
@@ -378,7 +377,6 @@ end
 
 -- {{{ Mouse Bindings
 root.buttons(awful.util.table.join(
-    awful.button({ }, 3, function () mymainmenu:toggle() end),
     awful.button({ }, 4, awful.tag.viewnext),
     awful.button({ }, 5, awful.tag.viewprev)
 ))
@@ -431,12 +429,6 @@ globalkeys = awful.util.table.join(
         function()
             awful.client.focus.bydirection("right")
             if client.focus then client.focus:raise() end
-        end),
-
-    -- Show Menu
-    awful.key({ modkey }, "w",
-        function ()
-            mymainmenu:show({ keygrabber = true })
         end),
 
     -- Show/Hide Wibox
@@ -527,13 +519,19 @@ globalkeys = awful.util.table.join(
     awful.key({ modkey }, "c", function () os.execute("xsel -p -o | xsel -i -b") end),
 
     -- User programs
-    awful.key({ modkey }, "q", function () awful.util.spawn(browser) end),
-    awful.key({ modkey }, "i", function () awful.util.spawn(browser2) end),
+    awful.key({ modkey }, "g", function () awful.util.spawn(browser) end),
     awful.key({ modkey }, "s", function () awful.util.spawn(gui_editor) end),
-    awful.key({ modkey }, "g", function () awful.util.spawn(graphics) end),
 
     -- Prompt
-    awful.key({ modkey }, "r", function () mypromptbox[mouse.screen]:run() end),
+    -- awful.key({ modkey }, "r", function () mypromptbox[mouse.screen]:run() end),
+    -- Run applications with dmenu
+    awful.key({ modkey }, "r", function() 
+        awful.util.spawn("dmenu_run -fn 'Sans 6' -i -p 'Run command:' -nb '" .. 
+        beautiful.bg_normal .. "' -nf '" .. beautiful.fg_normal .. 
+        "' -sb '" .. beautiful.bg_focus ..  
+        "' -sf '" .. beautiful.fg_focus .. "'") 
+    end),
+
     awful.key({ modkey }, "x",
               function ()
                   awful.prompt.run({ prompt = "Run Lua code: " },
@@ -625,6 +623,12 @@ awful.rules.rules = {
     { rule = { class = "MPlayer" },
           properties = { floating = true } },
 
+    { rule = { class = "mplayer2" },
+          properties = { floating = true } },
+
+    { rule = { class = "mpv" },
+          properties = { floating = true } },
+
     { rule = { class = "Dwb" },
           properties = { tag = tags[1][1] } },
 
@@ -697,3 +701,4 @@ for s = 1, screen.count() do screen[s]:connect_signal("arrange", function ()
       end)
 end
 -- }}}
+
